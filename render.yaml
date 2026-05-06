@@ -1,0 +1,40 @@
+# Deploy NexaFlow FREE on Render.com
+# 1. Push to GitHub
+# 2. Connect repo on render.com
+# 3. It auto-detects this file
+
+services:
+  - type: web
+    name: nexaflow-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite+aiosqlite:///./nexaflow.db
+      - key: DEBUG
+        value: false
+    healthCheckPath: /api/health
+    plan: free
+
+  - type: web
+    name: nexaflow-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://nexaflow-backend.onrender.com
