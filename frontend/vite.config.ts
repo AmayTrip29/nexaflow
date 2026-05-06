@@ -6,8 +6,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': { target: 'http://localhost:8000', changeOrigin: true },
-      '/ws': { target: 'ws://localhost:8000', ws: true },
+      '/api': { target: 'http://`${import.meta.env.VITE_API_URL}`', changeOrigin: true },
+      '/ws': { target: 'ws://`${import.meta.env.VITE_API_URL}`', ws: true },
     },
   },
 })

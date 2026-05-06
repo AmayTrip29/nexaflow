@@ -55,5 +55,5 @@ jobs:
           docker-compose build
           docker-compose up -d
           sleep 20
-          curl -f http://localhost:8000/api/health
+          curl -f http://`${import.meta.env.VITE_API_URL}`/api/health
           docker-compose down

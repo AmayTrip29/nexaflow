@@ -12,7 +12,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 [![Deploy](https://img.shields.io/badge/Deploy-Render_Free-46e3b7?style=flat-square&logo=render)](render.yaml)
 
-[Live Demo](#quick-start) · [API Docs](http://localhost:8000/api/docs) · [Architecture](#architecture)
+[Live Demo](#quick-start) · [API Docs](http://`${import.meta.env.VITE_API_URL}`/api/docs) · [Architecture](#architecture)
 
 </div>
 
@@ -55,8 +55,8 @@ cd nexaflow
 docker-compose up -d
 ```
 → Frontend: http://localhost  
-→ API: http://localhost:8000  
-→ API Docs: http://localhost:8000/api/docs
+→ API: http://`${import.meta.env.VITE_API_URL}`  
+→ API Docs: http://`${import.meta.env.VITE_API_URL}`/api/docs
 
 Login: `alex / alex123` or `demo / demo123`
 
@@ -242,7 +242,7 @@ WS     /ws/analysis/{review_id}     Real-time progress stream
 ### Example — Create a Review
 
 ```bash
-curl -X POST http://localhost:8000/api/reviews/ \
+curl -X POST http://`${import.meta.env.VITE_API_URL}`/api/reviews/ \
   -H "Authorization: Bearer <token>" \
   -F "title=auth module review" \
   -F "files=@auth.py"
