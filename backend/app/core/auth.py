@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from typing import Optional
+
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -13,15 +14,25 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.models.models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# 🔥 IMPORTANT: bcrypt config
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=12  # stable default
+)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
+# ✅ FIXED: handle bcrypt 72-byte limit
 def verify_password(plain: str, hashed: str) -> bool:
+    plain = plain[:72]  # truncate for bcrypt safety
     return pwd_context.verify(plain, hashed)
 
 
+# ✅ FIXED: prevent crash on long passwords
 def hash_password(password: str) -> str:
+    password = password[:72]  # 🔥 CRITICAL FIX
     return pwd_context.hash(password)
 
 
@@ -43,16 +54,25 @@ async def get_current_user(
         detail="Invalid or expired token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+        )
         username: str = payload.get("sub")
+
         if not username:
             raise exc
+
     except JWTError:
         raise exc
 
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
+
     if not user or not user.is_active:
         raise exc
+
     return user
